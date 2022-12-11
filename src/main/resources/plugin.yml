@@ -1,0 +1,8 @@
+name: Hunger
+version: '${version}'
+main: hunger.hunger.Hunger
+api-version: 1.19
+commands:
+  createHWorld:
+    description: Создаёт новый мир для игры
+    usage: /createHWorld
