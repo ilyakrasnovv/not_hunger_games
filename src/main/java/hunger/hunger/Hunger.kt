@@ -1,9 +1,19 @@
 package hunger.hunger
 
 import hunger.hunger.commandExecutors.CreateHWorld
+import hunger.hunger.web.routingConfiguration
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import org.bukkit.command.CommandExecutor
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
+import java.util.logging.Level
 
+/**
+ * Not Hunger Games plugin
+ * @author ilyakrasnovv
+ */
 class Hunger : JavaPlugin() {
     companion object {
         lateinit var instance: Hunger
@@ -15,6 +25,11 @@ class Hunger : JavaPlugin() {
             "createHWorld" to CreateHWorld()
         )
         registerCommands()
+//        object : BukkitRunnable() {
+//            override fun run() {
+//                embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
+//            }
+//        }.runTaskAsynchronously(this)
     }
 
     override fun onDisable() {
@@ -27,4 +42,8 @@ class Hunger : JavaPlugin() {
             getCommand(commandName)!!.setExecutor(executor)
         }
     }
+}
+
+fun Application.module() {
+    routingConfiguration()
 }

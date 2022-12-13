@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'org.jetbrains.kotlin.jvm' version '1.8.0-RC'
+    id "io.ktor.plugin" version "2.2.1"
 }
 
 group = 'hunger'
@@ -19,9 +20,18 @@ repositories {
     }
 }
 
+application {
+    mainClass.set("hunger.hunger.Hunger")
+}
+
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "io.ktor:ktor-server-core-jvm:$ktor_version"
+    implementation "io.ktor:ktor-server-netty-jvm:$ktor_version"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "io.ktor:ktor-server-tests-jvm:$ktor_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
 def targetJavaVersion = 17

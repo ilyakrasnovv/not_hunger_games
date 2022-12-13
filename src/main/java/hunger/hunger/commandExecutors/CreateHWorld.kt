@@ -11,6 +11,10 @@ import org.bukkit.command.CommandSender
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * handler of /createhworld
+ * to be removed
+ */
 class CreateHWorld : CommandExecutor {
     override fun onCommand(
         sender: CommandSender,
