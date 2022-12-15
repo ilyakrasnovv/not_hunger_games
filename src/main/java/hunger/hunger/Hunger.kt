@@ -1,17 +1,12 @@
 package hunger.hunger
 
 import hunger.hunger.commandExecutors.CreateHWorld
-import hunger.hunger.eventHandlers.PlayerJoinHandler
-import hunger.hunger.eventHandlers.PlayerRespawnHandler
+import hunger.hunger.eventHandlers.*
 import hunger.hunger.mock.StateProviderHardcodeMock
 import hunger.hunger.models.GameState
-import hunger.hunger.utilities.DATAWORLD_NAME
 import hunger.hunger.utilities.DataWorld
 import hunger.hunger.web.routingConfiguration
 import io.ktor.server.application.*
-import org.bukkit.World
-import org.bukkit.WorldCreator
-import org.bukkit.WorldType
 import org.bukkit.command.CommandExecutor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -36,6 +31,9 @@ class Hunger : JavaPlugin() {
         eventHandlers = listOf(
             PlayerRespawnHandler(),
             PlayerJoinHandler(),
+            BlockPlaceHandler(),
+            BlockExplodeHandler(),
+            BlockBreakHandler(),
         )
         registerCommands()
         registerEventHandlers()

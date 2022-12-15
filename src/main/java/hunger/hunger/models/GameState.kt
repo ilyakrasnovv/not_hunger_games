@@ -2,14 +2,15 @@ package hunger.hunger.models
 
 import hunger.hunger.Hunger
 import hunger.hunger.utilities.ALLOWED_DISTANCE_TO_BASE
-import hunger.hunger.utilities.IGNORE_UNREGISTERED_PLAYERS
 import hunger.hunger.utilities.generateHWorld
 import org.bukkit.Location
+import org.bukkit.OfflinePlayer
+import org.bukkit.World
 import org.bukkit.entity.Player
 
-class GameState(val provider: StateProvider) {
+class GameState(private val provider: StateProvider) {
     var players = listOf<GameStatePlayer>()
-    var world = Hunger.instance.server.worlds.first()
+    var world: World = Hunger.instance.server.worlds.first()
 
     init {
         update {}
@@ -23,14 +24,11 @@ class GameState(val provider: StateProvider) {
     fun ratedPlayersAmount(): Int =
         players.count { !it.admin }
 
-    fun ratedPlayersReady(): Boolean =
-        players.filter { !it.admin }.all { it.player != null }
-
     fun ratedPlayers(): List<GameStatePlayer> =
         players.filter { !it.admin }
 
     fun getGameStatePlayer(player: Player): GameStatePlayer? =
-        players.find { it.player == player }
+        players.find { it.player.uniqueId == player.uniqueId }
 
     fun validatePlayer(player: Player): Boolean =
         getGameStatePlayer(player) != null
@@ -38,20 +36,30 @@ class GameState(val provider: StateProvider) {
     fun isRatedPlayer(player: Player): Boolean =
         getGameStatePlayer(player)?.admin == false
 
-    fun registerBase(player: Player, baseLocation: Location): Boolean =
-        (baseLocation.distance(getGameStatePlayer(player)!!.initialSpawnLocation!!) <= ALLOWED_DISTANCE_TO_BASE)
+    fun validateBase(player: Player, baseLocation: Location): Boolean =
+        getGameStatePlayer(player)!!.let { gameStatePlayer ->
+            ((baseLocation.distance(getGameStatePlayer(player)!!.initialSpawnLocation!!) <= ALLOWED_DISTANCE_TO_BASE) &&
+                    (gameStatePlayer.baseData?.world != baseLocation.world))
+        }
+
+    fun placeBase(player: Player, baseLocation: Location) {
+        getGameStatePlayer(player)!!.baseData = baseLocation
+    }
+
+    fun baseCapture(winner: Player, baseOwner: OfflinePlayer) {
+        // TODO
+    }
 
     fun startNewGame(): Boolean = update {
-        if (!ratedPlayersReady() && !IGNORE_UNREGISTERED_PLAYERS)
-            return@update false
         val (newWorld, spawnPositions) = generateHWorld(ratedPlayersAmount())
-        ratedPlayers().filter { it.player != null }.zip(spawnPositions) { player, spawnPosition ->
+        ratedPlayers().zip(spawnPositions) { player, spawnPosition ->
             player.initialSpawnLocation = spawnPosition
-            (player.player?.takeIf { it.isOnline } as Player?)?.health = 0.0
+            (player.player.takeIf { it.isOnline } as Player?)?.health = 0.0
         }
         world = newWorld
         return@update true
     }
+
 
 }
 

@@ -1,9 +1,11 @@
 package hunger.hunger.utilities
 
 import hunger.hunger.Hunger
+import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.block.Chest
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import java.lang.Math.PI
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,19 +21,20 @@ private const val BASE_RADIUS = 1
 private const val MIN_HEIGHT = -64
 private const val MAX_HEIGHT = 320
 private /**/  val HARD_BLOCK = Material.OBSIDIAN
-private /**/  val STARTER_PACK = listOf(
+private /**/  val STARTER_PACK = listOf<ItemStack>(
     ItemStack(Material.CRAFTING_TABLE, 1),
     ItemStack(Material.DIRT, 64),
     ItemStack(Material.APPLE, 32),
     ItemStack(Material.LADDER, 64),
     ItemStack(Material.WATER_BUCKET, 1),
     ItemStack(Material.ACACIA_BOAT, 1),
+    ItemStack(UNCAPTURED_BASE_MATERIAL).apply {
+        val meta = itemMeta
+        meta.displayName(Component.text("База"))
+        itemMeta = meta
+    },
 )
 
-
-/**
- * function to generate bases in world
- */
 fun generateHWorld(playersAmount: Int): Pair<World, List<Location>> {
     val spawnLocations: List<Location>
     return initWorld().apply {
@@ -41,10 +44,7 @@ fun generateHWorld(playersAmount: Int): Pair<World, List<Location>> {
     }
 }
 
-/**
- * function to calculate positions for bases
- */
-private fun World.buildHWorld(playersAmount: Int) : List<Location> {
+private fun World.buildHWorld(playersAmount: Int): List<Location> {
     val radius = DISTANCE_BETWEEN_IN_CHUNKS * CHUNK_SIZE * playersAmount / (2 * PI)
     val positions = List(playersAmount) {
         val angle = 2.0 * PI * (it.toDouble() / playersAmount)
@@ -58,10 +58,7 @@ private fun World.buildHWorld(playersAmount: Int) : List<Location> {
     }
 }
 
-/**
- * function that generates base out of a [block][HARD_BLOCK]
- */
-private fun World.generateBase(x: Int, z: Int) : Location {
+private fun World.generateBase(x: Int, z: Int): Location {
     val center = (MIN_HEIGHT..MAX_HEIGHT).reversed().map { y ->
         Location(this, x.toDouble(), y.toDouble(), z.toDouble())
     }.find { loc ->
@@ -83,7 +80,6 @@ private fun World.generateBase(x: Int, z: Int) : Location {
         }
     }
     getBlockAt(center).type = Material.CHEST
-//    getBlockAt(center).setMetadata("fuckingshit", FixedMetadataValue(Hunger.instance, ))
     getBlockAt(center.clone().apply {
         y += 2
     }).run {
@@ -95,10 +91,6 @@ private fun World.generateBase(x: Int, z: Int) : Location {
         this.x += 1
         this.y += 2
     }
-//    Hunger.instance.server.getPlayer("ilyakrasnovv")!!
-//        .setMetadata("fuckingShit", FixedMetadataValue(Hunger.instance, PlayerBaseData()))
-//    val kek = Hunger.instance.server.getPlayer("ilyakrasnovv")!!.getPluginMetadata("fuckingShit")
-//    Hunger.instance.logger.log(Level.INFO, kek.toString())
 }
 
 private fun initWorld(): World {
