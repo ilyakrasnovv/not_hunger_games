@@ -1,14 +1,20 @@
 package hunger.hunger
 
 import hunger.hunger.commandExecutors.CreateHWorld
+import hunger.hunger.eventHandlers.PlayerJoinHandler
+import hunger.hunger.eventHandlers.PlayerRespawnHandler
+import hunger.hunger.mock.StateProviderHardcodeMock
+import hunger.hunger.models.GameState
+import hunger.hunger.utilities.DATAWORLD_NAME
+import hunger.hunger.utilities.DataWorld
 import hunger.hunger.web.routingConfiguration
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import org.bukkit.World
+import org.bukkit.WorldCreator
+import org.bukkit.WorldType
 import org.bukkit.command.CommandExecutor
+import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitRunnable
-import java.util.logging.Level
 
 /**
  * Not Hunger Games plugin
@@ -17,14 +23,23 @@ import java.util.logging.Level
 class Hunger : JavaPlugin() {
     companion object {
         lateinit var instance: Hunger
+        lateinit var state: GameState
+        lateinit var dataWorld: DataWorld
     }
 
     override fun onEnable() {
         instance = this
+        state = GameState(StateProviderHardcodeMock())
         commands = mapOf(
             "createHWorld" to CreateHWorld()
         )
+        eventHandlers = listOf(
+            PlayerRespawnHandler(),
+            PlayerJoinHandler(),
+        )
         registerCommands()
+        registerEventHandlers()
+        dataWorld = DataWorld()
 //        object : BukkitRunnable() {
 //            override fun run() {
 //                embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
@@ -40,6 +55,13 @@ class Hunger : JavaPlugin() {
     private fun registerCommands() {
         commands.forEach { (commandName, executor) ->
             getCommand(commandName)!!.setExecutor(executor)
+        }
+    }
+
+    private lateinit var eventHandlers: List<Listener>
+    private fun registerEventHandlers() {
+        eventHandlers.forEach { listener ->
+            server.pluginManager.registerEvents(listener, this)
         }
     }
 }

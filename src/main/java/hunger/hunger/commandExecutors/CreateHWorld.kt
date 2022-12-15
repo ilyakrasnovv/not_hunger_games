@@ -24,8 +24,7 @@ class CreateHWorld : CommandExecutor {
     ): Boolean {
         if (!sender.isOp)
             return false
-        val world = generateHWorld(args!![0].toInt())
-        sender.sendMessage("World ${world.name} created, ${args.toList()}")
+        Hunger.state.startNewGame()
         return true
     }
 }

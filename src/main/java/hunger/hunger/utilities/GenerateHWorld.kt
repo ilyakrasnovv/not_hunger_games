@@ -13,8 +13,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-// TODO 625
-private const val DISTANCE_BETWEEN_IN_CHUNKS = 6
+
 private const val CHUNK_SIZE = 16
 private const val BASE_RADIUS = 1
 private const val MIN_HEIGHT = -64
@@ -29,19 +28,23 @@ private /**/  val STARTER_PACK = listOf(
     ItemStack(Material.ACACIA_BOAT, 1),
 )
 
+
 /**
  * function to generate bases in world
  */
-fun generateHWorld(playersAmount: Int): World {
+fun generateHWorld(playersAmount: Int): Pair<World, List<Location>> {
+    val spawnLocations: List<Location>
     return initWorld().apply {
-        buildHWorld(playersAmount)
+        spawnLocations = buildHWorld(playersAmount)
+    }.run {
+        Pair(this, spawnLocations)
     }
 }
 
 /**
  * function to calculate positions for bases
  */
-private fun World.buildHWorld(playersAmount: Int) {
+private fun World.buildHWorld(playersAmount: Int) : List<Location> {
     val radius = DISTANCE_BETWEEN_IN_CHUNKS * CHUNK_SIZE * playersAmount / (2 * PI)
     val positions = List(playersAmount) {
         val angle = 2.0 * PI * (it.toDouble() / playersAmount)
@@ -50,7 +53,7 @@ private fun World.buildHWorld(playersAmount: Int) {
             (sin(angle) * radius).roundToInt()
         )
     }
-    positions.forEach { (x, z) ->
+    return positions.map { (x, z) ->
         generateBase(x, z)
     }
 }
@@ -58,7 +61,7 @@ private fun World.buildHWorld(playersAmount: Int) {
 /**
  * function that generates base out of a [block][HARD_BLOCK]
  */
-private fun World.generateBase(x: Int, z: Int) {
+private fun World.generateBase(x: Int, z: Int) : Location {
     val center = (MIN_HEIGHT..MAX_HEIGHT).reversed().map { y ->
         Location(this, x.toDouble(), y.toDouble(), z.toDouble())
     }.find { loc ->
@@ -88,6 +91,10 @@ private fun World.generateBase(x: Int, z: Int) {
         (this.state as Chest).blockInventory.contents = STARTER_PACK.toTypedArray()
     }
     Hunger.instance.logger.log(Level.INFO, "generated base at $center")
+    return center.clone().apply {
+        this.x += 1
+        this.y += 2
+    }
 //    Hunger.instance.server.getPlayer("ilyakrasnovv")!!
 //        .setMetadata("fuckingShit", FixedMetadataValue(Hunger.instance, PlayerBaseData()))
 //    val kek = Hunger.instance.server.getPlayer("ilyakrasnovv")!!.getPluginMetadata("fuckingShit")
