@@ -1,11 +1,12 @@
 package hunger.hunger.utilities
 
 import hunger.hunger.Hunger
+import hunger.hunger.dataManaging.DISTANCE_BETWEEN_IN_CHUNKS
+import hunger.hunger.dataManaging.UNCAPTURED_BASE_MATERIAL
 import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.block.Chest
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import java.lang.Math.PI
 import java.text.SimpleDateFormat
 import java.util.*
@@ -72,10 +73,10 @@ private fun World.generateBase(x: Int, z: Int): Location {
             block(delta)
         }
     }
-    deltaIterator(center.x.toInt()) { x ->
-        deltaIterator(center.y.toInt()) { y ->
-            deltaIterator(center.z.toInt()) { z ->
-                getBlockAt(x, y, z).type = HARD_BLOCK
+    deltaIterator(center.x.toInt()) { nx ->
+        deltaIterator(center.y.toInt()) { ny ->
+            deltaIterator(center.z.toInt()) { nz ->
+                getBlockAt(nx, ny, nz).type = HARD_BLOCK
             }
         }
     }

@@ -3,6 +3,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'org.jetbrains.kotlin.jvm' version '1.8.0-RC'
     id "io.ktor.plugin" version "2.2.1"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
 }
 
 group = 'hunger'
@@ -32,6 +33,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.ktor:ktor-server-tests-jvm:$ktor_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
 }
 
 def targetJavaVersion = 17

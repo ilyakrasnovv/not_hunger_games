@@ -1,9 +1,7 @@
 package hunger.hunger.eventHandlers
 
 import hunger.hunger.Hunger
-import hunger.hunger.utilities.getPluginMetadata
-import org.bukkit.Material
-import org.bukkit.entity.Player
+import hunger.hunger.utilities.getPlayerName
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
@@ -11,10 +9,12 @@ import org.bukkit.event.block.BlockBreakEvent
 class BlockBreakHandler : Listener {
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
-        val baseOwner = event.block.getPluginMetadata("base")?.value() as String?
+        val baseOwner = event.block.getPlayerName()
         if (baseOwner != null) {
             event.isCancelled = true
-            Hunger.state.baseCapture(event.player, Hunger.instance.server.getOfflinePlayer(baseOwner))
+            val owner = Hunger.instance.server.getOfflinePlayer(baseOwner)
+            if (event.player.name != baseOwner)
+                Hunger.state.dispatcher.capture(event.player, owner)
         }
     }
 }

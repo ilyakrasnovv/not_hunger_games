@@ -3,7 +3,6 @@ package hunger.hunger.models
 import hunger.hunger.Hunger
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
-import org.bukkit.metadata.FixedMetadataValue
 
 data class GameStatePlayer(
     val userName: String,
@@ -17,14 +16,14 @@ data class GameStatePlayer(
             getPlayer(userName) ?: getOfflinePlayer(userName)
         }
     var baseData: Location?
-        get() = Hunger.dataWorld["base", userName]?.value() as Location?
+        get() = Hunger.usersLocations["base", userName]
         set(value) {
-            Hunger.dataWorld["base", userName] = FixedMetadataValue(Hunger.instance, value)
+            Hunger.usersLocations["base", userName] = value!!
         }
 
     var initialSpawnLocation: Location?
-        get() = Hunger.dataWorld["ispawn", userName]?.value() as Location?
+        get() = Hunger.usersLocations["ispawn", userName]
         set(value) {
-            Hunger.dataWorld["ispawn", userName] = FixedMetadataValue(Hunger.instance, value)
+            Hunger.usersLocations["ispawn", userName] = value!!
         }
 }

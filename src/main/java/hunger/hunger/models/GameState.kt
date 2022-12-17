@@ -1,19 +1,33 @@
 package hunger.hunger.models
 
 import hunger.hunger.Hunger
-import hunger.hunger.utilities.ALLOWED_DISTANCE_TO_BASE
+import hunger.hunger.dataManaging.ALLOWED_DISTANCE_TO_BASE
 import hunger.hunger.utilities.generateHWorld
 import org.bukkit.Location
-import org.bukkit.OfflinePlayer
 import org.bukkit.World
+import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import java.io.File
 
-class GameState(private val provider: StateProvider) {
+class GameState(private val provider: StateProvider, val dispatcher: Dispatcher) {
+    companion object {
+        private val worldNameFile = File(Hunger.instance.dataFolder, "current_world_name.txt")
+    }
+
     var players = listOf<GameStatePlayer>()
-    var world: World = Hunger.instance.server.worlds.first()
+    lateinit var world: World
 
     init {
-        update {}
+        update {
+            synchronized(worldNameFile) {
+                worldNameFile.createNewFile()
+                val worldName = worldNameFile.readText().trim()
+                if (worldName.isEmpty())
+                    world = Hunger.instance.server.worlds.first()
+                else
+                    world = Hunger.instance.server.createWorld(WorldCreator(worldName))!!
+            }
+        }
     }
 
     fun <T> update(block: () -> T): T {
@@ -46,20 +60,17 @@ class GameState(private val provider: StateProvider) {
         getGameStatePlayer(player)!!.baseData = baseLocation
     }
 
-    fun baseCapture(winner: Player, baseOwner: OfflinePlayer) {
-        // TODO
-    }
-
-    fun startNewGame(): Boolean = update {
-        val (newWorld, spawnPositions) = generateHWorld(ratedPlayersAmount())
-        ratedPlayers().zip(spawnPositions) { player, spawnPosition ->
-            player.initialSpawnLocation = spawnPosition
-            (player.player.takeIf { it.isOnline } as Player?)?.health = 0.0
+    fun startNewGame(): Boolean = synchronized(worldNameFile) {
+        update {
+            val (newWorld, spawnPositions) = generateHWorld(ratedPlayersAmount())
+            worldNameFile.writeText(newWorld.name)
+            ratedPlayers().zip(spawnPositions) { player, spawnPosition ->
+                player.initialSpawnLocation = spawnPosition
+                (player.player.takeIf { it.isOnline } as Player?)?.health = 0.0
+            }
+            world = newWorld
+            return@update true
         }
-        world = newWorld
-        return@update true
     }
-
-
 }
 
