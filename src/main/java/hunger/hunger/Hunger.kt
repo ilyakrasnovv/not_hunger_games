@@ -1,18 +1,27 @@
 package hunger.hunger
 
+import com.lkeehl.tagapi.TagAPI
 import hunger.hunger.commandExecutors.CreateHWorld
 import hunger.hunger.dataManaging.BlockTiedUsernamesManager
+import hunger.hunger.dataManaging.LOGIC_SERVER_ACCESS_TOKEN
+import hunger.hunger.dataManaging.LOGIC_SERVER_URL
 import hunger.hunger.dataManaging.UserTiedLocationsManager
 import hunger.hunger.eventHandlers.*
-import hunger.hunger.mock.StateProviderHardcodeMock
 import hunger.hunger.models.Dispatcher
 import hunger.hunger.models.GameState
+import hunger.hunger.web.WebStateProvider
 import hunger.hunger.web.routingConfiguration
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import kotlinx.coroutines.runBlocking
 import org.bukkit.command.CommandExecutor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.logging.Level
 
 /**
  * Not Hunger Games plugin
@@ -24,13 +33,25 @@ class Hunger : JavaPlugin() {
         lateinit var state: GameState
         lateinit var usersLocations: UserTiedLocationsManager
         lateinit var blocksTiedUsers: BlockTiedUsernamesManager
+        val client = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
     }
 
     override fun onEnable() {
         instance = this
-        state = GameState(StateProviderHardcodeMock(), object : Dispatcher() {
+        TagAPI.onEnable(this)
+        state = GameState(WebStateProvider(), object : Dispatcher() {
             override fun sendData(content: String) {
-                logger.log(Level.INFO, content)
+                runBlocking {
+                    client.post("$LOGIC_SERVER_URL/game_state/event") {
+                        parameter("token", LOGIC_SERVER_ACCESS_TOKEN)
+                        setBody(content)
+                        contentType(ContentType.Application.Json)
+                    }
+                }
             }
         })
         commands = mapOf(
@@ -56,7 +77,7 @@ class Hunger : JavaPlugin() {
     }
 
     override fun onDisable() {
-        // Plugin shutdown logic
+        TagAPI.onDisable()
     }
 
     private lateinit var commands: Map<String, CommandExecutor>

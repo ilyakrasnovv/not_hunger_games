@@ -1,11 +1,14 @@
 package hunger.hunger.models
 
 import hunger.hunger.Hunger
+import kotlinx.serialization.Serializable
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
 
+@Serializable
 data class GameStatePlayer(
     val userName: String,
+    val shortCode: String,
     val score: Int,
     val potential: Int,
     val leader: String,

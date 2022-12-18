@@ -1,20 +1,10 @@
 package hunger.hunger.commandExecutors
 
 import hunger.hunger.Hunger
-import hunger.hunger.utilities.generateHWorld
-import org.bukkit.World
-import org.bukkit.WorldCreator
-import org.bukkit.WorldType
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import java.text.SimpleDateFormat
-import java.util.*
 
-/**
- * handler of /createhworld
- * to be removed
- */
 class CreateHWorld : CommandExecutor {
     override fun onCommand(
         sender: CommandSender,
