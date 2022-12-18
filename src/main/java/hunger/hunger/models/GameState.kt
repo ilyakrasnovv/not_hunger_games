@@ -3,11 +3,14 @@ package hunger.hunger.models
 import hunger.hunger.Hunger
 import hunger.hunger.dataManaging.ALLOWED_DISTANCE_TO_BASE
 import hunger.hunger.utilities.generateHWorld
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
 import java.io.File
+import java.util.logging.Level
 
 class GameState(private val provider: StateProvider, val dispatcher: Dispatcher) {
     companion object {
@@ -44,8 +47,15 @@ class GameState(private val provider: StateProvider, val dispatcher: Dispatcher)
     fun getGameStatePlayer(player: Player): GameStatePlayer? =
         players.find { it.player.uniqueId == player.uniqueId }
 
-    fun validatePlayer(player: Player): Boolean =
-        getGameStatePlayer(player) != null
+    fun validatePlayer(player: Player): Boolean {
+        val gameStatePlayer = getGameStatePlayer(player) ?: return false
+//        player.displayName(
+//            Component.text("fuck", TextColor.color(gameStatePlayer.leader.hashCode() % 0xFFFFFF))
+//        )
+//        Hunger.instance.logger.log(Level.INFO, player.displayName().toString())
+        player.setDisplayName("FUCK")
+        return true
+    }
 
     fun isRatedPlayer(player: Player): Boolean =
         getGameStatePlayer(player)?.admin == false
