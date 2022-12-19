@@ -1,8 +1,6 @@
 package hunger.hunger.utilities
 
 import hunger.hunger.Hunger
-import hunger.hunger.dataManaging.DISTANCE_BETWEEN_IN_CHUNKS
-import hunger.hunger.dataManaging.UNCAPTURED_BASE_MATERIAL
 import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.block.Chest
@@ -29,7 +27,7 @@ private /**/  val STARTER_PACK = listOf<ItemStack>(
     ItemStack(Material.LADDER, 64),
     ItemStack(Material.WATER_BUCKET, 1),
     ItemStack(Material.ACACIA_BOAT, 1),
-    ItemStack(UNCAPTURED_BASE_MATERIAL).apply {
+    ItemStack(Hunger.hConfig.UNCAPTURED_BASE_MATERIAL).apply {
         val meta = itemMeta
         meta.displayName(Component.text("База"))
         itemMeta = meta
@@ -46,7 +44,7 @@ fun generateHWorld(playersAmount: Int): Pair<World, List<Location>> {
 }
 
 private fun World.buildHWorld(playersAmount: Int): List<Location> {
-    val radius = DISTANCE_BETWEEN_IN_CHUNKS * CHUNK_SIZE * playersAmount / (2 * PI)
+    val radius = Hunger.hConfig.DISTANCE_BETWEEN_IN_CHUNKS * CHUNK_SIZE * playersAmount / (2 * PI)
     val positions = List(playersAmount) {
         val angle = 2.0 * PI * (it.toDouble() / playersAmount)
         Pair(

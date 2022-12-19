@@ -3,8 +3,7 @@ package hunger.hunger
 import com.lkeehl.tagapi.TagAPI
 import hunger.hunger.commandExecutors.CreateHWorld
 import hunger.hunger.dataManaging.BlockTiedUsernamesManager
-import hunger.hunger.dataManaging.LOGIC_SERVER_ACCESS_TOKEN
-import hunger.hunger.dataManaging.LOGIC_SERVER_URL
+import hunger.hunger.dataManaging.Config
 import hunger.hunger.dataManaging.UserTiedLocationsManager
 import hunger.hunger.eventHandlers.*
 import hunger.hunger.models.Dispatcher
@@ -13,15 +12,17 @@ import hunger.hunger.web.WebStateProvider
 import hunger.hunger.web.routingConfiguration
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import org.bukkit.command.CommandExecutor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
 
 /**
  * Not Hunger Games plugin
@@ -33,21 +34,24 @@ class Hunger : JavaPlugin() {
         lateinit var state: GameState
         lateinit var usersLocations: UserTiedLocationsManager
         lateinit var blocksTiedUsers: BlockTiedUsernamesManager
+        lateinit var hConfig: Config
         val client = HttpClient(CIO) {
-            install(ContentNegotiation) {
+            install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
                 json()
             }
         }
     }
 
-    override fun onEnable() {
+    override fun onEnable(
+    ) {
         instance = this
+        hConfig = Config()
         TagAPI.onEnable(this)
         state = GameState(WebStateProvider(), object : Dispatcher() {
             override fun sendData(content: String) {
                 runBlocking {
-                    client.post("$LOGIC_SERVER_URL/game_state/event") {
-                        parameter("token", LOGIC_SERVER_ACCESS_TOKEN)
+                    client.post("${hConfig.LOGIC_SERVER_URL}/game_state/event") {
+                        parameter("token", hConfig.LOGIC_SERVER_ACCESS_TOKEN)
                         setBody(content)
                         contentType(ContentType.Application.Json)
                     }
@@ -69,11 +73,16 @@ class Hunger : JavaPlugin() {
         registerEventHandlers()
         usersLocations = UserTiedLocationsManager()
         blocksTiedUsers = BlockTiedUsernamesManager()
-//        object : BukkitRunnable() {
-//            override fun run() {
-//                embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
-//            }
-//        }.runTaskAsynchronously(this)
+        object : BukkitRunnable() {
+            override fun run() {
+                embeddedServer(
+                    Netty,
+                    port = hConfig.PORT,
+                    host = "0.0.0.0",
+                    module = Application::module
+                ).start(wait = true)
+            }
+        }.runTaskAsynchronously(this)
     }
 
     override fun onDisable() {
@@ -96,5 +105,8 @@ class Hunger : JavaPlugin() {
 }
 
 fun Application.module() {
+    install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
+        json()
+    }
     routingConfiguration()
 }

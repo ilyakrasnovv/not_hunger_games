@@ -1,8 +1,6 @@
 package hunger.hunger.eventHandlers
 
 import hunger.hunger.Hunger
-import hunger.hunger.dataManaging.UNCAPTURED_BASE_MATERIAL
-import hunger.hunger.utilities.setPlayerName
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.title.Title
@@ -18,11 +16,10 @@ class BlockPlaceHandler : Listener {
         val block = event.blockPlaced
         if (!state.isRatedPlayer(player))
             return
-        if (block.type != UNCAPTURED_BASE_MATERIAL)
+        if (block.type != Hunger.hConfig.UNCAPTURED_BASE_MATERIAL)
             return
         if (state.validateBase(player, block.location)) {
             state.placeBase(player, block.location)
-            block.setPlayerName(player.name)
             player.showTitle(
                 Title.title(
                     Component.text("База установлена!", TextColor.fromHexString("#C64B8C")),
