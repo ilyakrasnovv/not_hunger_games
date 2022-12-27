@@ -37,6 +37,15 @@ class Executor {
         @Serializable
         class NewGameTask
 
+        @Serializable
+        data class GiveBlocksTask(
+            @SerialName("username")
+            val userName: String,
+            @SerialName("material_type")
+            val materialType: String,
+            val amount: Int,
+        )
+
         private inline fun <reified T> decode(data: JsonObject) = Json.decodeFromJsonElement<T>(data)
         fun execute(task: Task) {
             Hunger.state.run {
@@ -46,6 +55,7 @@ class Executor {
                     "personal_message" -> personalMessage(decode(task.data))
                     "place_bases" -> placeBases(decode(task.data))
                     "new_game" -> newGame(decode(task.data))
+                    "give_blocks" -> giveBlocks(decode(task.data))
                     else -> throw Throwable("Unknown data type")
                 }
             }

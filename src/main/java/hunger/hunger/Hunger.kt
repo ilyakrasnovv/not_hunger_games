@@ -23,6 +23,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import java.io.File
 
 /**
  * Not Hunger Games plugin
@@ -40,6 +41,7 @@ class Hunger : JavaPlugin() {
                 json()
             }
         }
+        lateinit var logData: File
     }
 
     override fun onEnable(
@@ -48,10 +50,19 @@ class Hunger : JavaPlugin() {
         hConfig = Config()
         TagAPI.onEnable(this)
         state = GameState(WebStateProvider(), object : Dispatcher() {
+
+            init {
+                logData = File(instance.dataFolder, "events_data.json")
+                logData.createNewFile()
+            }
+
             override fun sendData(content: String) {
                 runBlocking {
                     client.post("${hConfig.LOGIC_SERVER_URL}/game_state/event") {
                         parameter("token", hConfig.LOGIC_SERVER_ACCESS_TOKEN)
+                        synchronized(logData) {
+                            logData.appendText(content)
+                        }
                         setBody(content)
                         contentType(ContentType.Application.Json)
                     }
@@ -68,6 +79,7 @@ class Hunger : JavaPlugin() {
             BlockExplodeHandler(),
             BlockBreakHandler(),
             PlayerInteractHandler(),
+            PlayerPortalHandler(),
         )
         registerCommands()
         registerEventHandlers()

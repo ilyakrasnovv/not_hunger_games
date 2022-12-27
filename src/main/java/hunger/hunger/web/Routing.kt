@@ -32,5 +32,13 @@ fun Application.routingConfiguration() {
             }
             call.respond(HttpStatusCode.OK)
         }
+
+        get("/log") {
+            val content: String
+            synchronized(Hunger.logData) {
+                content = Hunger.logData.readText()
+            }
+            call.respondText(content)
+        }
     }
 }

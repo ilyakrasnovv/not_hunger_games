@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.util.logging.Level
@@ -188,6 +189,19 @@ class GameState(private val provider: StateProvider, val dispatcher: Dispatcher)
                 startNewGame()
             }
         }.runTask(Hunger.instance)
+    }
+
+    fun giveBlocks(task: Executor.Companion.GiveBlocksTask) {
+        if (task.amount < 0)
+            throw Throwable("Amount cannot be negative (did you consider integer overflow?)")
+        val material: Material
+        try {
+            material = Material.valueOf(task.materialType)
+        } catch (e: IllegalArgumentException) {
+            throw Throwable("Material ${task.materialType} does not exist.")
+        }
+        Hunger.instance.server.getPlayer(task.userName)?.inventory?.addItem(ItemStack(material, task.amount))
+            ?: throw Throwable("Player issues")
     }
 }
 
